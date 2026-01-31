@@ -1,105 +1,143 @@
 # GoTalk
 
-![Go Version](https://img.shields.io/badge/Go-1.20%2B-blue)
-![Platform](https://img.shields.io/badge/Platform-Windows%7CLinux%7CmacOS-lightgrey)
+![Go Version](https://img.shields.io/badge/Go-1.20%2B-blue?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Windows%7CLinux%7CmacOS-lightgrey?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-GoTalk is a lightweight, real-time chat server and terminal client built with Go for instant group communication.
+> **GoTalk** is a lightweight, real-time chat server and terminal client built with Go for instant group communication.
+
+---
 
 ## Table of Contents
 
+- [Overview](#overview)
 - [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Server](#server)
+  - [Client](#client)
+- [Configuration](#configuration)
 - [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Architecture](#architecture)
 - [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
+- [Technologies](#technologies)
+- [License](#license)
+
+---
+
+## Overview
+
+GoTalk demonstrates the power of Go's concurrency model and WebSockets to create a seamless chat experience. It includes a robust server capable of handling multiple concurrent connections and a stylish Terminal User Interface (TUI) client powered by Bubble Tea.
 
 ## Features
 
-- **Fast Messaging**: Chat happens instantly.
-- **Rooms**: Join different channels (e.g., general, random, tech).
-- **User Names**: Pick any name you like.
-- **Notifications**: See when people join or leave.
-- **Terminal App**: A cool-looking chat app for your command line.
-- **Reliable**: Handles errors and quitting safely.
+- **Real-time Messaging**: Instant communication using WebSockets.
+- **Multi-Room Support**: Create or join any room (e.g., `general`, `dev`, `random`).
+- **User Identity**: Simple username-based identity system.
+- **System Notifications**: Broadcasts when users join or leave the room.
+- **Rich TUI Client**: A beautiful terminal interface with viewport scrolling and input handling.
+- **Robustness**: Graceful server shutdown and error handling.
 
-## Project Structure
-
-Gotalk/
-├── cmd/
-│   ├── server/       # Starts the server
-│   └── client/       # Starts the chat app
-├── internal/
-│   ├── ws/           # Code for real-time chat
-│   ├── models/       # Data shapes used everywhere
-│   └── handlers/     # Handles web requests
-├── web/              # Website files
-├── go.mod            # Go project file
-├── README.md         # This file
-└── gotalk.bat        # Script to run everything easily
-```
-
-
-## Getting Started
+## Installation
 
 ### Prerequisites
 
-- Go 1.20 or higher.
+- **Go 1.20** or higher installed on your machine.
 
-### Running the Server
+### Clone the Repository
 
-1. Navigate to the project root.
-2. Run the server:
-   ```bash
-   go run cmd/server/main.go
-   ```
+```bash
+git clone https://github.com/udaykiriti/Gotalk.git
+cd Gotalk
+go mod download
+```
 
-> [!WARNING]
-> Ensure port 8080 is available before starting the server. If it is in use, the server will fail to start.
+## Usage
+
+You can run the project using the provided helper script or manual commands.
+
+### Quick Start (Windows)
+
+Simply run the `gotalk.bat` script:
+
+```powershell
+.\gotalk.bat
+```
+
+Select **Option 1** to start the server, then open a new terminal and select **Option 2** to start a client.
+
+---
+
+### Server
+
+Start the chat server on the default port `8080`.
+
+```bash
+go run cmd/server/main.go
+```
 
 > [!NOTE]
-> The server runs on localhost:8080 by default. You can change the address using flags if needed.
-3. The server will start on `localhost:8080`.
+> The server runs on `localhost:8080` by default.
 
-### Quick Start
+### Client
 
-We have a unified launcher script to run both the server and the client.
+Connect to the server using the CLI client. You can open multiple terminal windows to simulate different users.
 
-1. **Run the Server**:
-   Double-click `gotalk.bat` (or run `.\gotalk.bat`) and select **Option 1**.
-
-2. **Run the Client**:
-   Open a new terminal, run `.\gotalk.bat`, select **Option 2**, and follow the prompts.
+```bash
+go run cmd/client/main.go -user="Alice" -room="general"
+```
 
 > [!TIP]
-> You can open multiple terminal windows and run the client in each to simulate a chat between different users.
+> **Pro Tip**: Use the `-room` flag to create private channels!
 
-### Using the Chat
+## Configuration
 
-#### Web Interface
-1. Ensure the server is running.
-2. Open `http://localhost:8080`.
-3. Enter a **Username** and **Room Name**.
-4. Click "Connect".
+### Server Flags
 
-You can mix and match web and CLI users in the same room!
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-addr` | `:8080` | The HTTP network address to bind to. |
 
-## Architecture
+### Client Flags
 
-- **Hub**: Controls chat rooms and sends messages to everyone.
-- **Client**: Manages user connections and sending/receiving messages.
-- **CLI**: A command-line chat app.
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-host` | `localhost:8080` | The address of the chat server. |
+| `-user` | `Guest` | Your username for the session. |
+| `-room` | `general` | The chat room to join. |
+
+## Project Structure
+
+```text
+Gotalk/
+├── cmd/
+│   ├── server/       # Server entry point
+│   └── client/       # Client entry point (TUI)
+├── internal/
+│   ├── ws/           # WebSocket Hub & Client logic
+│   ├── models/       # Shared data structures (Message types)
+│   └── handlers/     # HTTP handlers
+├── web/              # Static frontend resources
+├── go.mod            # Go module definition
+└── LICENSE           # Project License
+```
 
 ## Troubleshooting
 
 ### Port Already in Use
-### Port Already in Use
-If you see an error saying the address is "already in use", it means port 8080 is busy.
-**Solution**: Stop the other program using that port or change the port settings.
+**Error**: `bind: address already in use`
+- **Solution**: The server is likely already running. Check your other terminals or kill the process using port 8080.
 
-### Firewall Issues
-If remote users cannot connect, ensure your firewall allows traffic on port 8080.
+### Connection Refused
+**Error**: `dial tcp ... connect: connection refused`
+- **Solution**: Ensure the server is running *before* starting the client.
 
-## Contributing
+## Technologies
 
-Contributions are welcome! Please feel free to open issues or submit pull requests.
+- [Go](https://go.dev/) - The programming language used.
+- [Gorilla WebSocket](https://github.com/gorilla/websocket) - WebSocket implementation for Go.
+- [Bubble Tea](https://github.com/charmbracelet/bubbletea) - A powerful little TUI framework.
+- [Lip Gloss](https://github.com/charmbracelet/lipgloss) - Style definitions for nice terminal layouts.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
