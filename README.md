@@ -14,9 +14,12 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Quick Start (Linux/macOS)](#quick-start-linuxmacos)
   - [Server](#server)
+  - [Web Client](#web-client)
   - [Client](#client)
 - [Configuration](#configuration)
+- [Development](#development)
 - [Project Structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
 - [Technologies](#technologies)
@@ -35,7 +38,8 @@ GoTalk demonstrates the power of Go's concurrency model and WebSockets to create
 - **User Identity**: Simple username-based identity system.
 - **System Notifications**: Broadcasts when users join or leave the room.
 - **Rich TUI Client**: A beautiful terminal interface with viewport scrolling and input handling.
-- **Robustness**: Graceful server shutdown and error handling.
+- **Web + TUI Clients**: Chat from either browser UI or terminal UI.
+- **Robustness**: Graceful server shutdown, connection handling, and safer message framing.
 
 ## Installation
 
@@ -67,6 +71,16 @@ Select **Option 1** to start the server, then open a new terminal and select **O
 
 ---
 
+### Quick Start (Linux/macOS)
+
+Run the launcher script:
+
+```bash
+./run.sh
+```
+
+Select **Option 1** to start the server, then open a second terminal and run **Option 2** for one or more clients.
+
 ### Server
 
 Start the chat server on the default port `8080`.
@@ -77,6 +91,16 @@ go run cmd/server/main.go
 
 > [!NOTE]
 > The server runs on `localhost:8080` by default.
+
+### Web Client
+
+Start the server, then open this URL in your browser:
+
+```text
+http://localhost:8080/
+```
+
+Enter username and room, click **Connect**, then start chatting.
 
 ### Client
 
@@ -105,6 +129,20 @@ go run cmd/client/main.go -user="Alice" -room="general"
 | `-user` | `Guest` | Your username for the session. |
 | `-room` | `general` | The chat room to join. |
 
+## Development
+
+Run tests:
+
+```bash
+go test ./...
+```
+
+Run static checks:
+
+```bash
+go vet ./...
+```
+
 ## Project Structure
 
 ```text
@@ -130,6 +168,10 @@ Gotalk/
 ### Connection Refused
 **Error**: `dial tcp ... connect: connection refused`
 - **Solution**: Ensure the server is running *before* starting the client.
+
+### Browser Page Not Loading
+**Error**: `/` returns not found or empty page
+- **Solution**: Make sure `web/index.html` exists and run the server from the project root, or deploy with a `web/` folder next to the server binary.
 
 ## Technologies
 
