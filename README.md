@@ -1,53 +1,27 @@
 # GoTalk
 
 ![Go Version](https://img.shields.io/badge/Go-1.20%2B-blue?style=flat-square)
-![Platform](https://img.shields.io/badge/Platform-Windows%7CLinux%7CmacOS-lightgrey?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-> **GoTalk** is a lightweight, real-time chat server and terminal client built with Go for instant group communication.
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Quick Start (Linux/macOS)](#quick-start-linuxmacos)
-  - [Server](#server)
-  - [Web Client](#web-client)
-  - [Client](#client)
-- [Configuration](#configuration)
-- [Development](#development)
-- [Project Structure](#project-structure)
-- [Troubleshooting](#troubleshooting)
-- [Technologies](#technologies)
-- [License](#license)
-
----
-
-## Overview
-
-GoTalk demonstrates the power of Go's concurrency model and WebSockets to create a seamless chat experience. It includes a robust server capable of handling multiple concurrent connections and a stylish Terminal User Interface (TUI) client powered by Bubble Tea.
+GoTalk is a lightweight real-time group chat application written in Go. It includes:
+- a WebSocket chat server,
+- a browser-based web client,
+- a terminal UI (TUI) client.
 
 ## Features
 
-- **Real-time Messaging**: Instant communication using WebSockets.
-- **Multi-Room Support**: Create or join any room (e.g., `general`, `dev`, `random`).
-- **User Identity**: Simple username-based identity system.
-- **System Notifications**: Broadcasts when users join or leave the room.
-- **Rich TUI Client**: A beautiful terminal interface with viewport scrolling and input handling.
-- **Web + TUI Clients**: Chat from either browser UI or terminal UI.
-- **Robustness**: Graceful server shutdown, connection handling, and safer message framing.
+- Real-time messaging over WebSockets
+- Multi-room chat support (`general`, `dev`, `random`, etc.)
+- Username-based identity per session
+- Join/leave system notifications
+- Browser and TUI clients
+- Graceful server shutdown
+- End-to-end smoke test for runtime verification
 
-## Installation
+## Quick Start
 
-### Prerequisites
-
-- **Go 1.20** or higher installed on your machine.
-
-### Clone the Repository
+### 1. Clone and install dependencies
 
 ```bash
 git clone https://github.com/udaykiriti/Gotalk.git
@@ -55,101 +29,60 @@ cd Gotalk
 go mod download
 ```
 
-## Usage
+### 2. Run the server
 
-You can run the project using the provided helper script or manual commands.
+```bash
+go run ./cmd/server
+```
 
-### Quick Start (Windows)
+Server default address: `:8080`
 
-Simply run the `gotalk.bat` script:
+### 3. Connect clients
+
+Web client:
+- Open `http://localhost:8080/`
+
+TUI client:
+
+```bash
+go run ./cmd/client -user="Alice" -room="general"
+```
+
+You can run multiple clients in separate terminals.
+
+## Launcher Scripts
+
+Windows:
 
 ```powershell
 .\gotalk.bat
 ```
 
-Select **Option 1** to start the server, then open a new terminal and select **Option 2** to start a client.
-
----
-
-### Quick Start (Linux/macOS)
-
-Run the launcher script:
+Linux/macOS:
 
 ```bash
 ./run.sh
 ```
 
-Select **Option 1** to start the server, then open a second terminal and run **Option 2** for one or more clients.
-
-### Server
-
-Start the chat server on the default port `8080`.
-
-```bash
-go run cmd/server/main.go
-```
-
-> [!NOTE]
-> The server runs on `localhost:8080` by default.
-
-### Web Client
-
-Start the server, then open this URL in your browser:
-
-```text
-http://localhost:8080/
-```
-
-Enter username and room, click **Connect**, then start chatting.
-
-### Client
-
-Connect to the server using the CLI client. You can open multiple terminal windows to simulate different users.
-
-```bash
-go run cmd/client/main.go -user="Alice" -room="general"
-```
-
-> [!TIP]
-> **Pro Tip**: Use the `-room` flag to create private channels!
-
 ## Configuration
 
-### Server Flags
+### Server flags
 
 | Flag | Default | Description |
-|------|---------|-------------|
-| `-addr` | `:8080` | The HTTP network address to bind to. |
+|---|---|---|
+| `-addr` | `:8080` | HTTP address for the server |
 
-### Client Flags
+### Client flags
 
 | Flag | Default | Description |
-|------|---------|-------------|
-| `-host` | `localhost:8080` | The address of the chat server. |
-| `-user` | `Guest` | Your username for the session. |
-| `-room` | `general` | The chat room to join. |
+|---|---|---|
+| `-host` | `localhost:8080` | Chat server host |
+| `-user` | `Guest` | Username for this session |
+| `-room` | `general` | Room to join |
 
 ## Development
 
-Run tests:
-
-```bash
-go test ./...
-```
-
-Run static checks:
-
-```bash
-go vet ./...
-```
-
-Run end-to-end websocket smoke test (starts server, dials 2 clients, verifies delivery):
-
-```bash
-go run scripts/smoke_e2e.go
-```
-
-Optional `Makefile` shortcuts:
+### Common commands
 
 ```bash
 make fmt
@@ -158,45 +91,79 @@ make vet
 make smoke
 ```
 
+Equivalent direct commands:
+
+```bash
+go fmt ./...
+go test ./...
+go vet ./...
+go run scripts/smoke_e2e.go
+```
+
 ## Project Structure
 
 ```text
 Gotalk/
 ├── cmd/
-│   ├── server/       # Server entry point
-│   └── client/       # Client entry point (TUI)
+│   ├── server/                 # Server entrypoint
+│   └── client/                 # TUI client entrypoint
 ├── internal/
-│   ├── ws/           # WebSocket Hub & Client logic
-│   ├── models/       # Shared data structures (Message types)
-│   └── handlers/     # HTTP handlers
-├── web/              # Static frontend resources
-├── scripts/          # Developer scripts (smoke checks, automation)
-├── Makefile          # Common developer commands
-├── go.mod            # Go module definition
-└── LICENSE           # Project License
+│   ├── handlers/               # HTTP handlers
+│   ├── models/                 # Shared data models
+│   └── ws/                     # WebSocket hub/client logic
+├── web/
+│   ├── index.html              # Web chat UI source
+│   └── assets.go               # Embedded web assets
+├── scripts/
+│   ├── smoke_e2e.go            # Runtime websocket smoke test
+│   └── README.md               # Scripts documentation
+├── Makefile                    # Developer task shortcuts
+├── run.sh                      # Linux/macOS launcher
+├── gotalk.bat                  # Windows launcher
+├── go.mod
+├── go.sum
+└── LICENSE
 ```
 
 ## Troubleshooting
 
-### Port Already in Use
-**Error**: `bind: address already in use`
-- **Solution**: The server is likely already running. Check your other terminals or kill the process using port 8080.
+### Port already in use
 
-### Connection Refused
-**Error**: `dial tcp ... connect: connection refused`
-- **Solution**: Ensure the server is running *before* starting the client.
+Error: `bind: address already in use`
 
-### Browser Page Not Loading
-**Error**: `/` returns not found or empty page
-- **Solution**: Make sure `web/index.html` exists and run the server from the project root, or deploy with a `web/` folder next to the server binary.
+- Stop the process currently using port `8080`, or run server on another port:
 
-## Technologies
+```bash
+go run ./cmd/server -addr :9090
+```
 
-- [Go](https://go.dev/) - The programming language used.
-- [Gorilla WebSocket](https://github.com/gorilla/websocket) - WebSocket implementation for Go.
-- [Bubble Tea](https://github.com/charmbracelet/bubbletea) - A powerful little TUI framework.
-- [Lip Gloss](https://github.com/charmbracelet/lipgloss) - Style definitions for nice terminal layouts.
+### Connection refused
+
+Error: `dial tcp ... connect: connection refused`
+
+- Start the server before launching clients.
+- Verify host/port passed to `-host` in the TUI client.
+
+### TUI client shows an error and stops receiving messages
+
+- Restart the client session.
+- Ensure server and client versions are from the same branch/commit.
+
+## Tech Stack
+
+- [Go](https://go.dev/)
+- [Gorilla WebSocket](https://github.com/gorilla/websocket)
+- [Bubble Tea](https://github.com/charmbracelet/bubbletea)
+- [Bubbles](https://github.com/charmbracelet/bubbles)
+- [Lip Gloss](https://github.com/charmbracelet/lipgloss)
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch
+3. Make changes with tests where applicable
+4. Open a pull request with a clear summary
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
