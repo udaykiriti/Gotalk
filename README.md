@@ -1,13 +1,9 @@
 # GoTalk
 
-[![Go Version](https://img.shields.io/badge/Go-1.20%2B-blue?style=flat-square)](https://go.dev/)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](#launcher-scripts)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/udaykiriti/Gotalk/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/udaykiriti/Gotalk/actions/workflows/ci.yml)
-[![Repo Size](https://img.shields.io/github/repo-size/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk)
-[![Last Commit](https://img.shields.io/github/last-commit/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk/commits/main)
-[![Issues](https://img.shields.io/github/issues/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk/issues)
-[![Stars](https://img.shields.io/github/stars/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk/stargazers)
+[![Go Version](https://img.shields.io/badge/Go-1.20%2B-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-4B5563?style=for-the-badge)](#launcher-scripts)
+[![License](https://img.shields.io/badge/License-MIT-16A34A?style=for-the-badge)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/udaykiriti/Gotalk/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/udaykiriti/Gotalk/actions/workflows/ci.yml)
 
 GoTalk is a lightweight real-time group chat application written in Go. It includes:
 - a WebSocket chat server,
