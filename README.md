@@ -3,6 +3,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.20%2B-blue?style=flat-square)](https://go.dev/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](#launcher-scripts)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/udaykiriti/Gotalk/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/udaykiriti/Gotalk/actions/workflows/ci.yml)
 [![Repo Size](https://img.shields.io/github/repo-size/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk)
 [![Last Commit](https://img.shields.io/github/last-commit/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk/commits/main)
 [![Issues](https://img.shields.io/github/issues/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk/issues)
@@ -25,6 +26,28 @@ GoTalk is a lightweight real-time group chat application written in Go. It inclu
 - Browser and TUI clients
 - Graceful server shutdown
 - End-to-end smoke test for runtime verification
+
+## Architecture
+
+```mermaid
+flowchart LR
+    B[Browser Client]
+    T[TUI Client]
+    S[HTTP/WebSocket Server]
+    H[Hub]
+    R1[Room: general]
+    R2[Room: dev]
+
+    B -->|/ws| S
+    T -->|/ws| S
+    S --> H
+    H --> R1
+    H --> R2
+    R1 --> B
+    R1 --> T
+    R2 --> B
+    R2 --> T
+```
 
 ## Quick Start
 
