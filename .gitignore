@@ -17,8 +17,8 @@
 # Project specific binaries
 server.exe
 client.exe
-server
-client
+/server
+/client
 bin/
 dist/
 
