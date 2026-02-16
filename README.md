@@ -1,13 +1,20 @@
 # GoTalk
 
-![Go Version](https://img.shields.io/badge/Go-1.20%2B-blue?style=flat-square)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+[![Go Version](https://img.shields.io/badge/Go-1.20%2B-blue?style=flat-square)](https://go.dev/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey?style=flat-square)](#launcher-scripts)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Repo Size](https://img.shields.io/github/repo-size/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk)
+[![Last Commit](https://img.shields.io/github/last-commit/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk/commits/main)
+[![Issues](https://img.shields.io/github/issues/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk/issues)
+[![Stars](https://img.shields.io/github/stars/udaykiriti/Gotalk?style=flat-square)](https://github.com/udaykiriti/Gotalk/stargazers)
 
 GoTalk is a lightweight real-time group chat application written in Go. It includes:
 - a WebSocket chat server,
 - a browser-based web client,
 - a terminal UI (TUI) client.
+
+> [!NOTE]
+> `web/index.html` is embedded into the Go binary, so serving `/` does not depend on runtime working directory.
 
 ## Features
 
@@ -37,6 +44,9 @@ go run ./cmd/server
 
 Server default address: `:8080`
 
+> [!TIP]
+> Run `make run-server` and `make run-client USER=Alice ROOM=general` for quicker local iteration.
+
 ### 3. Connect clients
 
 Web client:
@@ -49,6 +59,9 @@ go run ./cmd/client -user="Alice" -room="general"
 ```
 
 You can run multiple clients in separate terminals.
+
+> [!IMPORTANT]
+> Start the server first, then connect clients. If the server is down, client connections will fail immediately.
 
 ## Launcher Scripts
 
@@ -90,6 +103,9 @@ make test
 make vet
 make smoke
 ```
+
+> [!TIP]
+> Run `make smoke` before pushing changes. It catches runtime WebSocket regressions that static checks cannot.
 
 Equivalent direct commands:
 
@@ -137,6 +153,9 @@ Error: `bind: address already in use`
 go run ./cmd/server -addr :9090
 ```
 
+> [!WARNING]
+> If another process owns the port, clients may connect to the wrong service and you will see confusing behavior.
+
 ### Connection refused
 
 Error: `dial tcp ... connect: connection refused`
@@ -148,6 +167,9 @@ Error: `dial tcp ... connect: connection refused`
 
 - Restart the client session.
 - Ensure server and client versions are from the same branch/commit.
+
+> [!CAUTION]
+> Mixing binaries from old and new commits can cause protocol or UX mismatches. Rebuild both sides after pulling updates.
 
 ## Tech Stack
 
