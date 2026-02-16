@@ -1,40 +1,52 @@
 package handlers
 
 import (
-	"os"
-	"path/filepath"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
+
+	"gotalk/internal/ws"
 )
 
-func TestResolveIndexPathPrefersWorkingDirectory(t *testing.T) {
-	oldWD, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("getwd: %v", err)
-	}
-	defer func() {
-		_ = os.Chdir(oldWD)
-	}()
+func TestServeHome_Success(t *testing.T) {
+	h := NewHandler(ws.NewHub())
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rr := httptest.NewRecorder()
 
-	tmp := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(tmp, "web"), 0o755); err != nil {
-		t.Fatalf("mkdir web: %v", err)
-	}
+	h.ServeHome(rr, req)
 
-	expected := filepath.Join(tmp, "web", "index.html")
-	if err := os.WriteFile(expected, []byte("<html>ok</html>"), 0o644); err != nil {
-		t.Fatalf("write index: %v", err)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rr.Code)
 	}
-
-	if err := os.Chdir(tmp); err != nil {
-		t.Fatalf("chdir: %v", err)
+	if !strings.Contains(rr.Header().Get("Content-Type"), "text/html") {
+		t.Fatalf("expected text/html content type, got %q", rr.Header().Get("Content-Type"))
 	}
-
-	got, err := resolveIndexPath()
-	if err != nil {
-		t.Fatalf("resolveIndexPath returned error: %v", err)
+	if rr.Body.Len() == 0 {
+		t.Fatal("expected non-empty html response body")
 	}
+}
 
-	if filepath.Clean(got) != filepath.Clean(expected) {
-		t.Fatalf("expected %q, got %q", expected, got)
+func TestServeHome_NotFoundForNonRootPath(t *testing.T) {
+	h := NewHandler(ws.NewHub())
+	req := httptest.NewRequest(http.MethodGet, "/not-root", nil)
+	rr := httptest.NewRecorder()
+
+	h.ServeHome(rr, req)
+
+	if rr.Code != http.StatusNotFound {
+		t.Fatalf("expected status %d, got %d", http.StatusNotFound, rr.Code)
+	}
+}
+
+func TestServeHome_MethodNotAllowedForNonGET(t *testing.T) {
+	h := NewHandler(ws.NewHub())
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	rr := httptest.NewRecorder()
+
+	h.ServeHome(rr, req)
+
+	if rr.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("expected status %d, got %d", http.StatusMethodNotAllowed, rr.Code)
 	}
 }

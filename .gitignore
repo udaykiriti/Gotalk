@@ -17,6 +17,10 @@
 # Project specific binaries
 server.exe
 client.exe
+server
+client
+bin/
+dist/
 
 # IDE specific files
 .vscode/

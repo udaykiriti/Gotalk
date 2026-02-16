@@ -149,6 +149,15 @@ Run end-to-end websocket smoke test (starts server, dials 2 clients, verifies de
 go run scripts/smoke_e2e.go
 ```
 
+Optional `Makefile` shortcuts:
+
+```bash
+make fmt
+make test
+make vet
+make smoke
+```
+
 ## Project Structure
 
 ```text
@@ -161,6 +170,8 @@ Gotalk/
 │   ├── models/       # Shared data structures (Message types)
 │   └── handlers/     # HTTP handlers
 ├── web/              # Static frontend resources
+├── scripts/          # Developer scripts (smoke checks, automation)
+├── Makefile          # Common developer commands
 ├── go.mod            # Go module definition
 └── LICENSE           # Project License
 ```
