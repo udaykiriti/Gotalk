@@ -149,11 +149,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return fmt.Sprintf(
-		"%s\n\n%s",
-		m.viewport.View(),
-		m.textarea.View(),
-	) + "\n\n"
+	if m.err != nil {
+		errText := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("1")).
+			Render("Error: " + m.err.Error())
+		return fmt.Sprintf("%s\n\n%s\n\n%s", m.viewport.View(), errText, m.textarea.View()) + "\n\n"
+	}
+
+	return fmt.Sprintf("%s\n\n%s", m.viewport.View(), m.textarea.View()) + "\n\n"
 }
 
 // Commands

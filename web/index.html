@@ -193,7 +193,7 @@
         var msgInput = document.getElementById("msg"); // input field
 
         function appendLog(element) {
-            var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 50;
+            var doScroll = (log.scrollHeight - log.clientHeight - log.scrollTop) < 50;
             log.appendChild(element);
             if (doScroll) {
                 log.scrollTop = log.scrollHeight;
@@ -218,9 +218,11 @@
                 var user = userInput.value || "Anonymous";
 
                 var protocol = document.location.protocol === "https:" ? "wss" : "ws";
-                conn = new WebSocket(protocol + "://" + document.location.host + "/ws?room=" + encodeURIComponent(room) + "&user=" + encodeURIComponent(user));
+                var socket = new WebSocket(protocol + "://" + document.location.host + "/ws?room=" + encodeURIComponent(room) + "&user=" + encodeURIComponent(user));
+                conn = socket;
 
-                conn.onopen = function (evt) {
+                socket.onopen = function (evt) {
+                    if (conn !== socket) return;
                     statusSpan.innerText = "Connected to " + room;
                     statusSpan.style.color = "green";
                     msgInput.disabled = false;
@@ -232,11 +234,13 @@
                     userInput.disabled = true;
                 }
 
-                conn.onclose = function (evt) {
+                socket.onclose = function (evt) {
+                    if (conn !== socket) return;
                     statusSpan.innerText = "Disconnected";
                     statusSpan.style.color = "red";
                     msgInput.disabled = true;
                     sendBtn.disabled = true;
+                    conn = null;
                     // Unlock inputs
                     roomInput.disabled = false;
                     userInput.disabled = false;
@@ -247,7 +251,8 @@
                     appendLog(item);
                 };
 
-                conn.onmessage = function (evt) {
+                socket.onmessage = function (evt) {
+                    if (conn !== socket) return;
                     try {
                         var data = JSON.parse(evt.data);
                         var item = document.createElement("div");
