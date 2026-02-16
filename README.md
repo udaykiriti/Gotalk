@@ -143,6 +143,12 @@ Run static checks:
 go vet ./...
 ```
 
+Run end-to-end websocket smoke test (starts server, dials 2 clients, verifies delivery):
+
+```bash
+go run scripts/smoke_e2e.go
+```
+
 ## Project Structure
 
 ```text
