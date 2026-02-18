@@ -202,8 +202,9 @@
 
         document.getElementById("form").onsubmit = function () {
             if (!conn) return false;
-            if (!msg.value) return false;
-            conn.send(msg.value);
+            var trimmedMsg = msg.value.trim();
+            if (!trimmedMsg) return false;
+            conn.send(trimmedMsg);
             msg.value = "";
             return false;
         };

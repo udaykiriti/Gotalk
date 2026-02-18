@@ -3,6 +3,7 @@ package ws
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
 	"gotalk/internal/models"
 )
@@ -55,7 +56,13 @@ func (h *Hub) Run() {
 			if clients, ok := h.Rooms[client.Room]; ok {
 				if _, ok := clients[client]; ok {
 					delete(clients, client)
-					close(client.Send)
+					// Close channel safely - recover from panic if already closed
+					func() {
+						defer func() {
+							recover() // Ignore panic from double close
+						}()
+						close(client.Send)
+					}()
 					log.Printf("Client '%s' unregistered from room: %s", client.Username, client.Room)
 
 					// Broadcast "User Left" notification
@@ -81,8 +88,8 @@ func (h *Hub) Run() {
 
 // broadcastToRoom sends a message to all clients in the specified room
 func (h *Hub) broadcastToRoom(msg models.Message) {
-	// Validation: Don't broadcast empty messages
-	if msg.Content == "" {
+	// Validation: Don't broadcast empty or whitespace-only messages
+	if strings.TrimSpace(msg.Content) == "" {
 		return
 	}
 
@@ -98,12 +105,19 @@ func (h *Hub) broadcastToRoom(msg models.Message) {
 		return
 	}
 
+	// Collect clients to remove to avoid modifying map while iterating
+	var toRemove []*Client
 	for client := range clients {
 		select {
 		case client.Send <- bytes:
 		default:
 			close(client.Send)
-			delete(clients, client)
+			toRemove = append(toRemove, client)
 		}
+	}
+
+	// Remove disconnected clients after iteration
+	for _, client := range toRemove {
+		delete(clients, client)
 	}
 }

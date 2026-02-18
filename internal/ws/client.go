@@ -79,6 +79,11 @@ func (c *Client) ReadPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
+		// Skip empty messages
+		if len(message) == 0 {
+			continue
+		}
+
 		// Broadcast structured message
 		c.Hub.Broadcast <- models.Message{
 			Type:    models.TypeMessage,
@@ -99,6 +104,8 @@ func (c *Client) WritePump() {
 	defer func() {
 		ticker.Stop()
 		c.Conn.Close()
+		// Ensure client is unregistered when WritePump exits
+		c.Hub.Unregister <- c
 	}()
 	for {
 		select {
@@ -143,10 +150,18 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	if room == "" {
 		room = "general"
 	}
+	// Sanitize room name
+	if len(room) > 50 {
+		room = room[:50]
+	}
 
 	username := strings.TrimSpace(r.URL.Query().Get("user"))
 	if username == "" {
 		username = "Anonymous"
+	}
+	// Sanitize username
+	if len(username) > 30 {
+		username = username[:30]
 	}
 
 	client := &Client{
