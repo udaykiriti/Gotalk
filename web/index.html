@@ -3,306 +3,378 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GoTalk Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --chat-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --msg-mine: #dbeafe;
+            --msg-other: #f8fafc;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #f4f4f9;
-        }
-
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-
-        .chat-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 600px;
+            align-items: center;
+            justify-content: center;
         }
 
-        .main-area {
+        .app-container {
+            width: 100%;
+            max-width: 1000px;
+            height: 90vh;
+            background: var(--chat-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             display: flex;
-            flex-grow: 1;
+            flex-direction: column;
             overflow: hidden;
         }
 
-        .controls {
-            padding: 15px;
-            background: #e9ecef;
+        /* Header / Controls */
+        .header {
+            padding: 16px 24px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            gap: 10px;
             align-items: center;
-            border-bottom: 1px solid #ddd;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
-        .controls input {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-right: auto;
         }
 
-        .controls button {
-            padding: 8px 15px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .controls button:hover {
-            background: #0056b3;
-        }
-
-        .controls button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        #status {
-            margin-left: auto;
-            font-weight: bold;
-            font-size: 0.9em;
+        .input-group {
             display: flex;
-            align-items: center;
             gap: 8px;
         }
 
-        /* Status indicator dot */
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
+        input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+            color: var(--text-main);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        input:disabled {
+            background-color: #f8fafc;
+            color: var(--text-muted);
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            font-size: 0.9rem;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #connectBtn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        #connectBtn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #disconnectBtn {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        #disconnectBtn:hover {
+            background-color: #dc2626;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #f1f5f9;
+        }
+
+        /* Status Indicators */
+        .status-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            animation: none;
         }
 
-        .status-indicator.connected {
-            background: #28a745;
-        }
-
-        .status-indicator.disconnected {
-            background: #dc3545;
-        }
-
-        .status-indicator.connecting {
-            background: #ffc107;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        .status-indicator.reconnecting {
-            background: #fd7e14;
-            animation: pulse 1s ease-in-out infinite;
-        }
+        .status-dot.connected { background: var(--success); box-shadow: 0 0 0 2px #dcfce7; }
+        .status-dot.disconnected { background: var(--text-muted); }
+        .status-dot.connecting { background: var(--warning); animation: pulse 1.5s infinite; }
+        .status-dot.reconnecting { background: var(--danger); animation: pulse 1s infinite; }
 
         @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Main Chat Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
         }
 
         #log {
-            flex-grow: 1;
-            overflow-y: scroll;
-            padding: 15px;
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            scroll-behavior: smooth;
-            height: auto;
+            gap: 12px;
+            background: #ffffff;
         }
 
+        /* Sidebar */
         #user-list {
-            width: 200px;
-            background: #f8f9fa;
-            border-left: 1px solid #ddd;
-            padding: 10px;
-            overflow-y: auto;
-            display: none; /* Hidden by default */
+            width: 240px;
+            background: #f8fafc;
+            border-left: 1px solid var(--border);
+            display: none; /* Flex when active */
+            flex-direction: column;
         }
 
         #user-list h3 {
-            margin-top: 0;
-            font-size: 1em;
-            color: #555;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 16px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        #users-content {
+            padding: 0 16px 16px;
+            overflow-y: auto;
         }
 
         .user-item {
-            padding: 5px;
-            margin-bottom: 5px;
-            background: #fff;
-            border-radius: 4px;
-            font-size: 0.9em;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+        
+        .user-item:hover {
+            background: #e2e8f0;
         }
 
-        .user-item::before {
-            content: '';
-            display: inline-block;
+        .user-avatar {
             width: 8px;
             height: 8px;
-            background: #28a745;
+            background: var(--success);
             border-radius: 50%;
         }
 
-        /* Message Styles */
-        .message {
-            padding: 8px 12px;
-            border-radius: 6px;
-            max-width: 80%;
-            display: inline-block;
-            word-wrap: break-word;
-        }
-
+        /* Messages */
         .msg-row {
             display: flex;
             flex-direction: column;
-        }
-
-        /* User's own messages */
-        .msg-mine .message {
-            background: #dcf8c6;
-            align-self: flex-end;
+            max-width: 70%;
         }
 
         .msg-mine {
+            align-self: flex-end;
             align-items: flex-end;
         }
 
-        /* Others' messages */
-        .msg-other .message {
-            background: #fff;
-            border: 1px solid #eee;
-            align-self: flex-start;
-        }
-
         .msg-other {
+            align-self: flex-start;
             align-items: flex-start;
         }
 
-        /* Meta info */
         .meta {
-            font-size: 0.7em;
-            color: #777;
-            margin-bottom: 2px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
             display: flex;
-            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .msg-mine .message {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+        
+        .msg-mine .meta {
+             justify-content: flex-end;
+        }
+
+        .msg-other .message {
+            background: var(--msg-other);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 2px;
         }
 
         .timestamp {
-            font-size: 0.85em;
-            color: #aaa;
-            margin-left: 8px;
+            opacity: 0.7;
+            font-size: 0.7rem;
         }
 
         /* Notifications */
         .notification {
-            text-align: center;
-            color: #888;
-            font-style: italic;
-            font-size: 0.8em;
-            margin: 5px 0;
+            align-self: center;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 8px 0;
         }
+        
+        .notification.warning { color: var(--danger); background: #fef2f2; }
+        .notification.info { color: var(--primary); background: #eff6ff; }
 
-        .notification.warning {
-            color: #ff6b6b;
-            font-weight: bold;
-        }
-
-        .notification.info {
-            color: #0066cc;
-            font-weight: 500;
-        }
-
-        .input-area {
-            padding: 15px;
-            border-top: 1px solid #ddd;
-            background: #f9f9f9;
+        /* Footer / Input */
+        .footer {
+            padding: 16px 24px;
+            background: #ffffff;
+            border-top: 1px solid var(--border);
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         #msg {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        #msg:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
         }
 
         #sendBtn {
-            padding: 10px 20px;
-            background: #28a745;
+            background: var(--primary);
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            padding: 0 24px;
+            font-weight: 600;
         }
-
-        #sendBtn:hover {
-            background: #218838;
-        }
-
+        
         #sendBtn:disabled {
-            background: #ccc;
+            background: var(--border);
             cursor: not-allowed;
         }
 
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none !important; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 
 <body>
-    <h1>GoTalk</h1>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="brand">GoTalk</div>
+            
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Username" value="Guest">
+                <input type="text" id="room" value="general" placeholder="Room">
+            </div>
 
-    <div class="chat-container">
-        <!-- Login / Controls -->
-        <div class="controls">
-            <input type="text" id="username" placeholder="Username" value="Guest" />
-            <input type="text" id="room" value="general" placeholder="Room name" />
-            <button id="connectBtn" onclick="handleConnectClick()">Connect</button>
-            <button id="disconnectBtn" onclick="handleDisconnectClick()" class="hidden">Disconnect</button>
-            <span id="status">
-                <span class="status-indicator disconnected"></span>
+            <div class="actions">
+                <button id="connectBtn" onclick="handleConnectClick()">Connect</button>
+                <button id="disconnectBtn" onclick="handleDisconnectClick()" class="hidden">Disconnect</button>
+            </div>
+
+            <div class="status-badge">
+                <span class="status-dot disconnected"></span>
                 <span id="statusText">Disconnected</span>
-            </span>
+            </div>
         </div>
 
-        <div class="main-area">
+        <!-- Main Content -->
+        <div class="main-content">
             <div id="log">
-                <div class="notification">Enter a username and room to join the chat.</div>
+                <div class="notification">Welcome! Enter your details above to join.</div>
             </div>
+            
             <div id="user-list">
-                <h3>Online Users</h3>
+                <h3>Online</h3>
                 <div id="users-content"></div>
             </div>
         </div>
 
-        <form id="form" class="input-area">
-            <input type="text" id="msg" autofocus autocomplete="off" placeholder="Type a message..." disabled />
-            <input type="submit" value="Send" disabled id="sendBtn" />
+        <!-- Footer -->
+        <form id="form" class="footer">
+            <input type="text" id="msg" autocomplete="off" placeholder="Type a message..." disabled>
+            <button type="submit" id="sendBtn" disabled>Send</button>
         </form>
     </div>
 
+    <!-- Script starts here (unchanged logic, just class mapping) -->
     <script>
+        // Mapping old classes to new structure is implicit because I kept IDs same.
+        // However, I changed 'status-indicator' to 'status-dot' in CSS. 
+        // I need to update the script to target 'status-dot' or alias it.
+        // Let's update the script variable selector too.
         // ============================================================================
         // WebSocket Connection Manager with Robust Reconnection Strategy
         // ============================================================================
@@ -341,7 +413,7 @@
         const roomInput = document.getElementById("room");
         const userInput = document.getElementById("username");
         const statusText = document.getElementById("statusText");
-        const statusIndicator = document.querySelector(".status-indicator");
+        const statusIndicator = document.querySelector(".status-dot");
         const sendBtn = document.getElementById("sendBtn");
         const msgInput = document.getElementById("msg");
         const connectBtn = document.getElementById("connectBtn");
@@ -371,7 +443,7 @@
             statusText.innerText = message;
 
             // Update status indicator
-            statusIndicator.className = 'status-indicator';
+            statusIndicator.className = 'status-dot';
             switch (state) {
                 case ConnectionState.CONNECTED:
                     statusIndicator.classList.add('connected');
@@ -570,11 +642,20 @@
                         data.users.forEach(u => {
                             const uItem = document.createElement("div");
                             uItem.className = "user-item";
-                            uItem.innerText = u;
+                            
+                            const avatar = document.createElement("div");
+                            avatar.className = "user-avatar";
+                            
+                            const nameSpan = document.createElement("span");
+                            nameSpan.innerText = u;
+
                             if (u === currentUser) {
-                                uItem.style.fontWeight = "bold";
-                                uItem.innerText += " (You)";
+                                nameSpan.style.fontWeight = "600";
+                                nameSpan.innerText += " (You)";
                             }
+                            
+                            uItem.appendChild(avatar);
+                            uItem.appendChild(nameSpan);
                             usersContent.appendChild(uItem);
                         });
                     }
