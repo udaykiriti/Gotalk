@@ -122,6 +122,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case incomingMsg:
 		if msg.Type == models.TypeNotification {
 			m.addSystemLine(msg.Content)
+		} else if msg.Type == models.TypeUserList {
+			// Ignore user list updates in TUI for now
+			return m, waitForIncomingMessage(m.conn)
 		} else {
 			timestamp := lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render(time.Now().Format("15:04"))
 			senderColor := lipgloss.Color("2")
