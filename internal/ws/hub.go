@@ -56,13 +56,7 @@ func (h *Hub) Run() {
 			if clients, ok := h.Rooms[client.Room]; ok {
 				if _, ok := clients[client]; ok {
 					delete(clients, client)
-					// Close channel safely - recover from panic if already closed
-					func() {
-						defer func() {
-							recover() // Ignore panic from double close
-						}()
-						close(client.Send)
-					}()
+					close(client.Send)
 					log.Printf("Client '%s' unregistered from room: %s", client.Username, client.Room)
 
 					// Broadcast "User Left" notification
@@ -105,19 +99,12 @@ func (h *Hub) broadcastToRoom(msg models.Message) {
 		return
 	}
 
-	// Collect clients to remove to avoid modifying map while iterating
-	var toRemove []*Client
 	for client := range clients {
 		select {
 		case client.Send <- bytes:
 		default:
 			close(client.Send)
-			toRemove = append(toRemove, client)
+			delete(clients, client)
 		}
-	}
-
-	// Remove disconnected clients after iteration
-	for _, client := range toRemove {
-		delete(clients, client)
 	}
 }

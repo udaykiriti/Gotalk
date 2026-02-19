@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"gotalk/internal/models"
+	"regexp"
 )
 
 const (
@@ -28,15 +29,13 @@ const (
 var (
 	newline = []byte{'\n'}
 	space   = []byte{' '}
+	// Validation regex: Only alphanumeric, hyphens, underscores
+	validNameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 )
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	// Allow all origins for this demo
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
 }
 
 // Client is a middleman between the websocket connection and the hub.
@@ -140,17 +139,25 @@ func (c *Client) WritePump() {
 
 // ServeWs handles websocket requests from the peer.
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+	// 1. Upgrade connection first
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Printf("Upgrade error: %v", err)
 		return
 	}
 
+	// 2. Extract and validate parameters
 	room := strings.TrimSpace(r.URL.Query().Get("room"))
 	if room == "" {
 		room = "general"
 	}
-	// Sanitize room name
+	if !validNameRegex.MatchString(room) {
+		log.Printf("Invalid room name: %s", room)
+		conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "Invalid room name"))
+		conn.Close()
+		return
+	}
+	// Sanitize room name length
 	if len(room) > 50 {
 		room = room[:50]
 	}
@@ -159,11 +166,18 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	if username == "" {
 		username = "Anonymous"
 	}
-	// Sanitize username
+	if !validNameRegex.MatchString(username) {
+		log.Printf("Invalid username: %s", username)
+		conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "Invalid username"))
+		conn.Close()
+		return
+	}
+	// Sanitize username length
 	if len(username) > 30 {
 		username = username[:30]
 	}
 
+	// 3. Register client
 	client := &Client{
 		Hub:      hub,
 		Conn:     conn,
@@ -172,6 +186,8 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		Username: username,
 	}
 	client.Hub.Register <- client
+
+	log.Printf("New connection: User='%s' Room='%s' RemoteAddr='%s'", username, room, r.RemoteAddr)
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
