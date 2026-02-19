@@ -6,6 +6,7 @@ type MessageType string
 const (
 	TypeMessage      MessageType = "message"
 	TypeNotification MessageType = "notification"
+	TypeUserList     MessageType = "user_list"
 )
 
 // Message represents a message to be broadcasted to a specific room.
@@ -15,4 +16,5 @@ type Message struct {
 	Room    string      `json:"room"`
 	User    string      `json:"user"`
 	Content string      `json:"content"`
+	Users   []string    `json:"users,omitempty"`
 }

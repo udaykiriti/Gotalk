@@ -52,6 +52,9 @@ func (h *Hub) Run() {
 				Content: client.Username + " joined the room",
 			})
 
+			// Broadcast updated user list
+			h.broadcastUserList(client.Room)
+
 		case client := <-h.Unregister:
 			if clients, ok := h.Rooms[client.Room]; ok {
 				if _, ok := clients[client]; ok {
@@ -66,6 +69,11 @@ func (h *Hub) Run() {
 						User:    "System",
 						Content: client.Username + " left the room",
 					})
+
+					// Broadcast updated user list
+					if len(clients) > 0 {
+						h.broadcastUserList(client.Room)
+					}
 
 					// Clean up empty rooms
 					if len(clients) == 0 {
@@ -107,4 +115,25 @@ func (h *Hub) broadcastToRoom(msg models.Message) {
 			delete(clients, client)
 		}
 	}
+}
+
+// broadcastUserList sends the list of active users in a room to all clients in that room
+func (h *Hub) broadcastUserList(room string) {
+	clients, ok := h.Rooms[room]
+	if !ok {
+		return
+	}
+
+	var users []string
+	for client := range clients {
+		users = append(users, client.Username)
+	}
+
+	msg := models.Message{
+		Type:    models.TypeUserList,
+		Room:    room,
+		Users:   users,
+		Content: "user_list_update", // Dummy content to pass validation
+	}
+	h.broadcastToRoom(msg)
 }
