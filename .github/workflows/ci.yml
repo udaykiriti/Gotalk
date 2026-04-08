@@ -30,15 +30,19 @@ jobs:
       - name: Go format check
         if: runner.os == 'Linux'
         run: |
-          if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
+          FORMAT_DIFF=$(gofmt -d .)
+          if [ -n "$FORMAT_DIFF" ]; then
             echo "The following files are not formatted:"
             gofmt -l .
+            echo ""
+            echo "Differences:"
+            echo "$FORMAT_DIFF"
             exit 1
           fi
 
       - name: Golangci-lint
         if: runner.os == 'Linux'
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
           version: latest
 
