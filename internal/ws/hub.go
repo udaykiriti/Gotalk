@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"strings"
+	"sync"
 
 	"gotalk/internal/models"
+	"gotalk/internal/storage"
 )
 
 // Hub maintains the set of active clients and broadcasts messages to the
@@ -13,6 +15,7 @@ import (
 type Hub struct {
 	// Registered clients by room.
 	Rooms map[string]map[*Client]bool
+	mu    sync.RWMutex
 
 	// Inbound messages from the clients.
 	Broadcast chan models.Message
@@ -22,14 +25,22 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	Unregister chan *Client
+	
+	// Terminate the hub.
+	Quit chan struct{}
+
+	// Persistence layer
+	Store *storage.Store
 }
 
-func NewHub() *Hub {
+func NewHub(store *storage.Store) *Hub {
 	return &Hub{
 		Broadcast:  make(chan models.Message),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 		Rooms:      make(map[string]map[*Client]bool),
+		Quit:       make(chan struct{}),
+		Store:      store,
 	}
 }
 
@@ -37,14 +48,29 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
+			h.mu.Lock()
 			// Register client to room
 			if _, ok := h.Rooms[client.Room]; !ok {
 				h.Rooms[client.Room] = make(map[*Client]bool)
 			}
 			h.Rooms[client.Room][client] = true
+			h.mu.Unlock()
 			log.Printf("Client '%s' registered to room: %s", client.Username, client.Room)
 
-			// Broadcast "User Joined" notification
+			// 1. Send chat history to the new client
+			if h.Store != nil {
+				history, err := h.Store.GetRoomHistory(client.Room, 50)
+				if err != nil {
+					log.Printf("Error fetching history for room %s: %v", client.Room, err)
+				} else {
+					for _, msg := range history {
+						bytes, _ := json.Marshal(msg)
+						client.Send <- bytes
+					}
+				}
+			}
+
+			// 2. Broadcast "User Joined" notification
 			h.broadcastToRoom(models.Message{
 				Type:    models.TypeNotification,
 				Room:    client.Room,
@@ -56,6 +82,7 @@ func (h *Hub) Run() {
 			h.broadcastUserList(client.Room)
 
 		case client := <-h.Unregister:
+			h.mu.Lock()
 			if clients, ok := h.Rooms[client.Room]; ok {
 				if _, ok := clients[client]; ok {
 					delete(clients, client)
@@ -81,11 +108,46 @@ func (h *Hub) Run() {
 					}
 				}
 			}
+			h.mu.Unlock()
 
 		case message := <-h.Broadcast:
+			// Persist message if it's a regular chat message
+			if h.Store != nil && message.Type == models.TypeMessage {
+				_ = h.Store.SaveMessage(message)
+			}
 			h.broadcastToRoom(message)
+
+		case <-h.Quit:
+			log.Println("Shutting down Hub...")
+			// Close all clients in all rooms
+			for room, clients := range h.Rooms {
+				for client := range clients {
+					delete(clients, client)
+					close(client.Send)
+					client.Conn.Close()
+				}
+				delete(h.Rooms, room)
+			}
+			return
 		}
 	}
+}
+
+// Stop shuts down the hub
+func (h *Hub) Stop() {
+	close(h.Quit)
+}
+
+// GetActiveRooms returns a list of active room names and their user counts
+func (h *Hub) GetActiveRooms() map[string]int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	rooms := make(map[string]int)
+	for room, clients := range h.Rooms {
+		rooms[room] = len(clients)
+	}
+	return rooms
 }
 
 // broadcastToRoom sends a message to all clients in the specified room

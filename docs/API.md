@@ -12,6 +12,7 @@ The GoTalk client and server communicate using a JSON-based protocol over WebSoc
 ### Query Parameters
 - `room` (string, optional): The name of the room to join. Defaults to "general".
 - `user` (string, optional): The username. Defaults to "Anonymous".
+- `history` (implicit): Upon successful connection, the server automatically pushes the last 50 messages of the room's history to the client.
 
 **Validation Rules:**
 - Username and Room name must match regex `^[a-zA-Z0-9_-]+$`.

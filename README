@@ -1,0 +1,72 @@
+GOTALK 
+======
+
+GoTalk is a robust, real-time group chat application built with Go (Golang) 
+and pure JavaScript. It features a WebSocket-based server, a responsive web 
+client, and a terminal user interface (TUI).
+
+KEY FEATURES
+----------------
+
+* REAL-TIME MESSAGING: Instant message delivery using WebSockets.
+* MESSAGE PERSISTENCE: SQLite-backed storage ensures chat history is saved.
+* CHRONOLOGICAL HISTORY: Automatically loads the last 50 messages when joining.
+* EASY JOIN QR CODES: Scan terminal output or share in-app codes to join rooms.
+* RESPONSIVE MOBILE UI: Fully optimized interface for mobile and desktop.
+* NETWORK AUTO-DISCOVERY: Shows your local network IP for easy sharing.
+* LIVE USER LIST: See who is currently online in real-time.
+* ROBUST RECONNECTION: Automatic reconnection with exponential backoff.
+* SECURE BY DEFAULT: Strict input validation and CORS policies.
+
+QUICK START
+------------
+
+PREREQUISITES:
+- Go 1.22 or higher
+- Make (optional)
+
+INSTALLATION:
+1. Clone the repository:
+   $ git clone https://github.com/udaykiriti/Gotalk.git
+   $ cd Gotalk
+
+2. Build the project:
+   $ go build -o gotalk.exe ./cmd/server
+
+RUNNING THE SERVER:
+Start the server:
+   $ ./gotalk.exe
+
+The server will automatically display a SCANABLE QR CODE for your local network.
+
+Visit http://localhost:8080 in your browser to start chatting.
+Invite others by clicking the "Invite" button in the web header.
+
+PROJECT STRUCTURE
+-----------------
+
+- cmd/server: Main server entry point (with IP detection & QR scan).
+- cmd/client: TUI client entry point.
+- internal/storage: SQLite persistence layer.
+- internal/ws: WebSocket logic (Hub, Client, Message).
+- internal/handlers: HTTP handlers.
+- web: Frontend assets (Responsive HTML/CSS/JS).
+- gotalk.db: SQLite database file (created automatically).
+
+FOR MORE DETAILED DOCUMENTATION, SEE THE docs/ DIRECTORY.
+
+
+DOCUMENTATION
+---------------
+
+- Architecture: docs/arch.md
+- API Protocol: docs/API.md
+- Frontend Guide: docs/ui.md
+- Security: docs/SECURITY.md
+- Development: docs/dev.md
+
+LICENSE
+--------
+
+MIT
+

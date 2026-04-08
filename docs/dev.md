@@ -30,6 +30,13 @@ Run specific validation scripts:
 go test -v scripts/validation_test.go
 ```
 
+## Database Management
+
+GoTalk uses a local SQLite database named `gotalk.db` to persist chat history.
+- **Location**: The database file is created in the project root directory.
+- **Resetting History**: To clear all messages, delete the `gotalk.db` file and restart the server. The schema will be re-initialized automatically.
+- **Inspection**: You can use standard SQLite tools (e.g., `sqlite3`, `DB Browser for SQLite`) to inspect the `messages` table.
+
 ## Directory Structure
 
 - `cmd/`: Main applications (server, client).

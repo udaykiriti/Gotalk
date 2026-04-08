@@ -31,8 +31,25 @@ To ensure reliability, the client implements an exponential backoff strategy for
 
 - **Status Bar**: Shows current connection state (color-coded dots) and attempt counters.
 - **Chat Log**: Scrollable area displaying messages and system notifications.
-- **User List**: Sidebar showing real-time list of online users.
+- **User List (Desktop)**: Sidebar showing real-time list of online users.
+- **User List (Mobile)**: Slide-out drawer accessible via the "Users" icon in the header.
+- **Invite Modal**: A glassmorphism overlay containing a scannable QR code for the current room URL.
 - **Input Area**: Message input field, disabled when disconnected.
+
+## Responsive Design
+
+GoTalk uses a mobile-first responsive strategy:
+- **Breakpoints**: 
+    - `768px`: Layout shifts from desktop sidebar to mobile drawer. Full-screen container used.
+    - `480px`: Header elements stack to maintain usability.
+- **Drawer Logic**: On small screens, the user list is hidden by default. Toggling it opens a drawer that can be closed by clicking outside.
+- **Bubble Adaptive Width**: Message bubbles expand to `85%` on mobile to maximize readability.
+
+## QR Invitation System
+
+The frontend uses the `QRious` library to generate room-specific invitations:
+1. **Dynamic URL**: The invitation URL is constructed using the current `window.location.href` and the active room name.
+2. **Instant Scan**: Generations occur entirely on the client-side, ensuring fast and private link sharing.
 
 ## Security Features
 

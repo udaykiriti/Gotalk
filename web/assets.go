@@ -1,8 +1,8 @@
 package webassets
 
-import _ "embed"
+import "embed"
 
-// IndexHTML is the embedded browser client page served at "/".
+// Assets contains the embedded browser client assets.
 //
-//go:embed index.html
-var IndexHTML []byte
+//go:embed index.html static/*
+var Assets embed.FS

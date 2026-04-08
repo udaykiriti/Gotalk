@@ -11,8 +11,11 @@ permissions:
 
 jobs:
   test:
-    name: Test / Vet / Race
-    runs-on: ubuntu-latest
+    name: Test / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Checkout
@@ -24,6 +27,29 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Go format check
+        if: runner.os == 'Linux'
+        run: |
+          if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
+            echo "The following files are not formatted:"
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: Golangci-lint
+        if: runner.os == 'Linux'
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+
+      - name: Install govulncheck
+        if: runner.os == 'Linux'
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck
+        if: runner.os == 'Linux'
+        run: govulncheck ./...
+
       - name: Go test
         run: go test ./...
 
@@ -31,7 +57,9 @@ jobs:
         run: go vet ./...
 
       - name: Race test
+        if: runner.os == 'Linux'
         run: go test -race ./...
 
       - name: Smoke test
+        if: runner.os == 'Linux'
         run: go run scripts/smoke_e2e.go

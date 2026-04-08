@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"gotalk/internal/models"
 	"regexp"
+	"sync"
 )
 
 const (
@@ -53,6 +54,17 @@ type Client struct {
 
 	// Username of the client
 	Username string
+
+	// Ensure unregister is called only once
+	closeOnce sync.Once
+}
+
+// Close closes the client connection and sends an unregister signal to the hub.
+func (c *Client) Close() {
+	c.closeOnce.Do(func() {
+		c.Hub.Unregister <- c
+		c.Conn.Close()
+	})
 }
 
 // ReadPump pumps messages from the websocket connection to the hub.
@@ -62,8 +74,7 @@ type Client struct {
 // reads from this goroutine.
 func (c *Client) ReadPump() {
 	defer func() {
-		c.Hub.Unregister <- c
-		c.Conn.Close()
+		c.Close()
 	}()
 	c.Conn.SetReadLimit(maxMessageSize)
 	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -102,9 +113,7 @@ func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.Conn.Close()
-		// Ensure client is unregistered when WritePump exits
-		c.Hub.Unregister <- c
+		c.Close()
 	}()
 	for {
 		select {
@@ -151,30 +160,22 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	if room == "" {
 		room = "general"
 	}
-	if !validNameRegex.MatchString(room) {
+	if !validNameRegex.MatchString(room) || len(room) > 50 {
 		log.Printf("Invalid room name: %s", room)
-		conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "Invalid room name"))
+		conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(4000, "Invalid room name"), time.Now().Add(time.Second))
 		conn.Close()
 		return
-	}
-	// Sanitize room name length
-	if len(room) > 50 {
-		room = room[:50]
 	}
 
 	username := strings.TrimSpace(r.URL.Query().Get("user"))
 	if username == "" {
 		username = "Anonymous"
 	}
-	if !validNameRegex.MatchString(username) {
+	if !validNameRegex.MatchString(username) || len(username) > 30 {
 		log.Printf("Invalid username: %s", username)
-		conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "Invalid username"))
+		conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(4001, "Invalid username"), time.Now().Add(time.Second))
 		conn.Close()
 		return
-	}
-	// Sanitize username length
-	if len(username) > 30 {
-		username = username[:30]
 	}
 
 	// 3. Register client
