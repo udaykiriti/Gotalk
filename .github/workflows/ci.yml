@@ -27,21 +27,14 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Workaround Go version mismatch
-        # golangci-lint (built with 1.24) cannot parse go.mod with 1.25.0
-        # We temporarily change it to 1.24.0 just for the CI run.
-        run: sed -i 's/go 1.25.0/go 1.24.0/' go.mod
-
       - name: Go format check
         if: runner.os == 'Linux'
         run: |
-          FORMAT_DIFF=$(gofmt -d .)
-          if [ -n "$FORMAT_DIFF" ]; then
+          go fmt ./...
+          if [ -n "$(git status --porcelain)" ]; then
             echo "The following files are not formatted:"
-            gofmt -l .
-            echo ""
-            echo "Differences:"
-            echo "$FORMAT_DIFF"
+            git status --porcelain
+            git diff
             exit 1
           fi
 
@@ -50,6 +43,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
+          args: ./...
 
       - name: Install govulncheck
         if: runner.os == 'Linux'
