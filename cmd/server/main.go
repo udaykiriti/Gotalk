@@ -3,15 +3,15 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
-	"net"
-	"fmt"
-	"strings"
 
 	"github.com/grandcat/zeroconf"
 	"github.com/skip2/go-qrcode"

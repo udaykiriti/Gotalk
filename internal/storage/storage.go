@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	_ "modernc.org/sqlite"
 	"gotalk/internal/models"
+	_ "modernc.org/sqlite"
 )
 
 type Store struct {

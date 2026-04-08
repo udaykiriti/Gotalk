@@ -18,8 +18,8 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/grandcat/zeroconf"
 	"github.com/gorilla/websocket"
+	"github.com/grandcat/zeroconf"
 
 	"gotalk/internal/models"
 )
@@ -162,7 +162,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if kmsg, ok := msg.(tea.KeyMsg); ok {
 		switch kmsg.Type {
 		case tea.KeyCtrlC:
-			if m.conn != nil { _ = m.conn.Close() }
+			if m.conn != nil {
+				_ = m.conn.Close()
+			}
 			return m, tea.Quit
 		case tea.KeyEsc:
 			if m.state == statePicking {
@@ -170,7 +172,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, discoverServer
 			}
 			if m.state == stateChat {
-				if m.conn != nil { _ = m.conn.Close(); m.conn = nil }
+				if m.conn != nil {
+					_ = m.conn.Close()
+					m.conn = nil
+				}
 				m.connected = false
 				m.state = statePicking
 				return m, fetchRooms(*host)
@@ -199,10 +204,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if selected == nil {
 				return m, nil // Safety: avoid panic on empty list
 			}
-			
+
 			roomItem := selected.(item)
 			if strings.HasPrefix(string(roomItem), "+") {
-				if *roomName == "" { *roomName = "general" }
+				if *roomName == "" {
+					*roomName = "general"
+				}
 			} else {
 				*roomName = strings.Fields(string(roomItem))[0]
 			}
@@ -210,9 +217,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.status = "Connecting..."
 			return m, connectToWebsocket
 		}
-		
+
 		m.list, liCmd = m.list.Update(msg)
-		
+
 		if msg, ok := msg.(roomsFetchedMsg); ok {
 			var items []list.Item
 			for room, count := range msg {
@@ -238,7 +245,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.addSystemLine(msg.Content)
 			} else {
 				senderColor := lipgloss.Color("2")
-				if msg.User == *username { senderColor = lipgloss.Color("6") }
+				if msg.User == *username {
+					senderColor = lipgloss.Color("6")
+				}
 				line := fmt.Sprintf("%s %s: %s",
 					lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render(time.Now().Format("15:04")),
 					lipgloss.NewStyle().Foreground(senderColor).Bold(true).Render(msg.User),
@@ -273,10 +282,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
 		m.list.SetSize(msg.Width, msg.Height-4)
-		
+
 		m.textarea.SetWidth(msg.Width - 2)
 		// Precise height calculation
-		headerH := 2 
+		headerH := 2
 		footerH := 2
 		m.viewport.Width = msg.Width
 		m.viewport.Height = msg.Height - m.textarea.Height() - headerH - footerH
@@ -318,7 +327,7 @@ func (m model) View() string {
 	case stateChat:
 		// Title bar
 		title := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("230")).Background(lipgloss.Color("25")).Padding(0, 1).Render(fmt.Sprintf("GoTalk v2 | Room: %s | User: %s", *roomName, *username))
-		
+
 		// Status bar
 		connState := "ONLINE"
 		connColor := lipgloss.Color("2")
@@ -326,7 +335,7 @@ func (m model) View() string {
 			connState = "OFFLINE"
 			connColor = lipgloss.Color("1")
 		}
-		
+
 		statusLine := lipgloss.NewStyle().Foreground(lipgloss.Color("250")).Padding(0, 1).Render(fmt.Sprintf("Status: %s  |  %s", m.status, lipgloss.NewStyle().Foreground(connColor).Bold(true).Render(connState)))
 
 		// Textarea input

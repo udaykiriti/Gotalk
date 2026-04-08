@@ -19,7 +19,7 @@ func NewHandler(hub *ws.Hub) *Handler {
 
 func (h *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
-	
+
 	// Serve index.html for the root path
 	if r.URL.Path == "/" {
 		if r.Method != http.MethodGet {

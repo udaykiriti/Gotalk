@@ -25,7 +25,7 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	Unregister chan *Client
-	
+
 	// Terminate the hub.
 	Quit chan struct{}
 
