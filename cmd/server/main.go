@@ -51,11 +51,11 @@ func main() {
 	port := strings.TrimPrefix(*addr, ":")
 	serverURL := fmt.Sprintf("http://%s:%s", localIP, port)
 
-	fmt.Printf("\n" + strings.Repeat("=", 60) + "\n")
+	fmt.Print("\n" + strings.Repeat("=", 60) + "\n")
 	fmt.Printf(" [GoTalk] Server is starting...\n")
 	fmt.Printf(" Internal : http://localhost:%s\n", port)
 	fmt.Printf(" Network  : %s\n", serverURL)
-	fmt.Printf(strings.Repeat("=", 60) + "\n")
+	fmt.Println(strings.Repeat("=", 60))
 
 	// Generate and print QR code to terminal
 	qr, err := qrcode.New(serverURL, qrcode.Medium)
@@ -63,7 +63,7 @@ func main() {
 		fmt.Println("\n Scan to join from your phone:")
 		fmt.Print(qr.ToSmallString(false))
 	}
-	fmt.Printf(strings.Repeat("=", 60) + "\n\n")
+	fmt.Print(strings.Repeat("=", 60) + "\n\n")
 
 	srv := &http.Server{Addr: *addr}
 
