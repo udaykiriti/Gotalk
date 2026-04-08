@@ -1,6 +1,6 @@
 module gotalk
 
-go 1.25.0
+go 1.24.0
 
 require (
 	github.com/charmbracelet/bubbles v1.0.0
@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/grandcat/zeroconf v1.0.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	modernc.org/sqlite v1.48.1
+	modernc.org/sqlite v1.34.0
 )
 
 require (
