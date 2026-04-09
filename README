@@ -62,11 +62,10 @@ DOCUMENTATION
 - Architecture: docs/arch.md
 - API Protocol: docs/API.md
 - Frontend Guide: docs/ui.md
-- Security: docs/SECURITY.md
+- Security: SECURITY
 - Development: docs/dev.md
 
 LICENSE
 --------
 
 MIT
-
